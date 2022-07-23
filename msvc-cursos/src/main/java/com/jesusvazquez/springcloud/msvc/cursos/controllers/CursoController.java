@@ -1,7 +1,9 @@
 package com.jesusvazquez.springcloud.msvc.cursos.controllers;
 
+import com.jesusvazquez.springcloud.msvc.cursos.models.Usuario;
 import com.jesusvazquez.springcloud.msvc.cursos.models.entity.Curso;
 import com.jesusvazquez.springcloud.msvc.cursos.services.CursoService;
+import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,10 +11,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 public class CursoController {
@@ -26,8 +25,8 @@ public class CursoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> buscarById(@PathVariable Long id) {
-        Optional<Curso> curso = cursoService.buscarById(id);
+    public ResponseEntity<?> detalle(@PathVariable Long id) {
+        Optional<Curso> curso = cursoService.buscarByIdConUsuarios(id);  //cursoService.buscarById(id);
 
         if(curso.isPresent()) {
             return ResponseEntity.ok(curso.get());
@@ -68,6 +67,68 @@ public class CursoController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/asignar-usuario/{cursoId}")
+    public ResponseEntity<?> asignarUsuario(@RequestBody Usuario usuario,
+                                            @PathVariable Long cursoId) {
+        Optional<Usuario>  o;
+        try {
+            o = cursoService.asignarUsuario(usuario,cursoId);
+        } catch (FeignException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    Collections.singletonMap("mensaje", "No existe el usuario " +
+                            "por id o error en la comunicacion: " + e.getMessage()));
+        }
+
+
+        if(o.isPresent()) {
+            return  ResponseEntity.status(HttpStatus.CREATED).body(o.get());
+        }
+        return ResponseEntity.notFound().build();
+
+    }
+
+    @PostMapping("/crear-usuario/{cursoId}")
+    public ResponseEntity<?> crearUsuario(@RequestBody Usuario usuario,
+                                            @PathVariable Long cursoId) {
+        Optional<Usuario>  o;
+        try {
+            o = cursoService.crearUsuario(usuario,cursoId);
+        } catch (FeignException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    Collections.singletonMap("mensaje", "No se pudo crear el usuario " +
+                            "o error en la comunicacion: " + e.getMessage()));
+        }
+        if(o.isPresent()) {
+            return  ResponseEntity.status(HttpStatus.CREATED).body(o.get());
+        }
+        return ResponseEntity.notFound().build();
+
+    }
+
+    @DeleteMapping("/eliminar-usuario/{cursoId}")
+    public ResponseEntity<?> eliminarUsuario(@RequestBody Usuario usuario,
+                                            @PathVariable Long cursoId) {
+        Optional<Usuario>  o;
+        try {
+            o = cursoService.eliminarUsuario(usuario,cursoId);
+        } catch (FeignException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    Collections.singletonMap("mensaje", "No existe el usuario por id  " +
+                            "o error en la comunicacion: " + e.getMessage()));
+        }
+
+        if(o.isPresent()) {
+            return  ResponseEntity.status(HttpStatus.CREATED).body(o.get());
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/eliminar-curso-usuario/{id}")
+    public ResponseEntity<?> eliminarCursoUsuarioPorId(@PathVariable Long id) {
+        cursoService.eliminarCursoUsuarioPorId(id);
+        return ResponseEntity.noContent().build();
     }
 
     private ResponseEntity<?> validarCamposParametros(BindingResult bindingResult) {
