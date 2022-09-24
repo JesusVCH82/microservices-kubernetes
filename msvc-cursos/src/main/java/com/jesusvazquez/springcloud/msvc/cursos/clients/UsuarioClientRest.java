@@ -8,7 +8,7 @@ import java.util.List;
 
 //Esta anotacion sirve para saber al cliente al que va a consumir pasandole el nombre del microservicio
 //que se encuentra en el properties, y tambien como parametro la ruta del microservicio
-@FeignClient(name = "msvc-usuarios", url="localhost:8001")
+@FeignClient(name = "msvc-usuarios")
 public interface UsuarioClientRest {
 
     //Los metodos son declarativos, ya que solo apuntando a la url y enviando

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres14
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      role: postgres
+  template:
+    metadata:
+      labels:
+        role: postgres
+    spec:
+      containers:
+        - name: postgres14
+          image: postgres:14-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: msvc-cursos
+                  key: password
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: msvc-cursos
+                  key: database
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: data-postgres
+            #Aqui va la definicion de donde irian los volumenes
+      volumes:
+        - name: data-postgres
+          persistentVolumeClaim:
+             claimName: postgres-pvc
+

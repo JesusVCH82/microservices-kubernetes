@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: msvc-usuarios
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: msvc-usuarios
+  template:
+    metadata:
+      labels:
+        app: msvc-usuarios
+    spec:
+      containers:
+      - image: jesusvc/usuarios:v2
+        name: usuarios
+        ports:
+        - containerPort: 8001
+        env:
+          - name: PORT
+            valueFrom:
+              configMapKeyRef:
+                name: msvc-usuarios
+                key: port
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: msvc-usuarios
+                key: db_host
+          - name: DB_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: msvc-usuarios
+                key: database
+          - name: DB_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                name: msvc-usuarios
+                key: username
+          - name: DB_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                name: msvc-usuarios
+                key: password
+          - name: CURSOS_URL
+            valueFrom:
+              configMapKeyRef:
+                name: msvc-usuarios
+                key: curso_url

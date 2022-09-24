@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql8
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql8
+  template:
+    metadata:
+      labels:
+        app: mysql8
+    spec:
+      containers:
+        - image: mysql:8
+          name: mysq8
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              #value: root1234
+              #Se puede utilizar congiguracion de mapa a apartir de un archivo para hacer referencia a varios valores
+              valueFrom:
+                configMapKeyRef:
+                  name: msvc-usuarios
+                  key: password
+            - name: MYSQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: msvc-usuarios
+                  key: msvc_usuarios
+          #VolumneMounts sirve para saber donde se guardan de forma interna los datos en el contenedor
+          # La ruta del mountPath debe ser la misma donde mysql guarda los datos, dependiendo el moto de bd puede cambiar la ruta
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: data-mysql
+      #Aqui va la definicion de donde irian los volumenes
+      volumes:
+        - name: data-mysql
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+          #El path nos dice donde se guardaran los datos, la ruta puede ser otra o con otro nombre
+          # Se quita esta configuracion para que el volume no este dentro de un pod sino que este separado y distribuido
+          #hostPath:
+            #path: /var/lib/mysql
+            #type: DirectoryOrCreate
