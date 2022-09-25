@@ -29,7 +29,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: msvc-usuarios
-                  key: msvc_usuarios
+                  key: database
           #VolumneMounts sirve para saber donde se guardan de forma interna los datos en el contenedor
           # La ruta del mountPath debe ser la misma donde mysql guarda los datos, dependiendo el moto de bd puede cambiar la ruta
           volumeMounts:
